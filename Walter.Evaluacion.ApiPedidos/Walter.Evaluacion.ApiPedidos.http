@@ -1,0 +1,6 @@
+@Walter.Evaluacion.ApiPedidos_HostAddress = http://localhost:5048
+
+GET {{Walter.Evaluacion.ApiPedidos_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
