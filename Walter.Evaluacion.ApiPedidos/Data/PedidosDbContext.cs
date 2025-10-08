@@ -8,7 +8,7 @@ namespace Walter.Evaluacion.ApiPedidos.Data
         public PedidosDbContext(DbContextOptions<PedidosDbContext> options) : base(options)
         {   
         }
-        public DbSet<Pedido> Comprobantes { get; set; }
+        public DbSet<Pedido> Pedidos { get; set; }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -44,14 +44,11 @@ namespace Walter.Evaluacion.ApiPedidos.Data
             //        .OnDelete(DeleteBehavior.Cascade);
             //});
 
-            //// Seed data
-            //modelBuilder.Entity<Comprobante>().HasData(
-            //    new Comprobante { IdComprobante = 1, FechaComprobante = DateTime.Now.AddDays(-10), IdCliente = 1 },
-            //    new Comprobante { IdComprobante = 2, FechaComprobante = DateTime.Now.AddDays(-8), IdCliente = 2 },
-            //    new Comprobante { IdComprobante = 3, FechaComprobante = DateTime.Now.AddDays(-5), IdCliente = 3 },
-            //    new Comprobante { IdComprobante = 4, FechaComprobante = DateTime.Now.AddDays(-3), IdCliente = 4 },
-            //    new Comprobante { IdComprobante = 5, FechaComprobante = DateTime.Now.AddDays(-1), IdCliente = 5 }
-            //);
+            // Seed data
+            modelBuilder.Entity<Pedido>().HasData(
+                new Pedido { IdPedido = 1, FechaPedido = DateTime.Now.AddDays(-1), IdCliente = 1,MontoPedido=547.2308M },
+                new Pedido { IdPedido = 2, FechaPedido = DateTime.Now.AddDays(-2), IdCliente = 3, MontoPedido=12.886M }
+                );
 
             //modelBuilder.Entity<ComprobanteItem>().HasData(
             //    new ComprobanteItem { IdComprobanteItem = 1, IdComprobante = 1, IdArticulo = 1, Cantidad = 2 },
