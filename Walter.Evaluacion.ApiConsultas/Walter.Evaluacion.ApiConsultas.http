@@ -1,0 +1,6 @@
+@Walter.Evaluacion.ApiConsultas_HostAddress = http://localhost:5291
+
+GET {{Walter.Evaluacion.ApiConsultas_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

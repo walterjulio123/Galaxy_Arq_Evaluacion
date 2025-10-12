@@ -1,0 +1,6 @@
+@Walter.Evaluacion.ApiPagos_HostAddress = http://localhost:5102
+
+GET {{Walter.Evaluacion.ApiPagos_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###

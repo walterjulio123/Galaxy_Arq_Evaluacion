@@ -1,9 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36518.9 d17.14
+VisualStudioVersion = 17.14.36518.9
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Walter.Evaluacion.ApiPedidos", "Walter.Evaluacion.ApiPedidos\Walter.Evaluacion.ApiPedidos.csproj", "{07A2BA6D-2671-48E8-820F-F314594349A6}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Walter.Evaluacion.ApiPagos", "Walter.Evaluacion.ApiPagos\Walter.Evaluacion.ApiPagos.csproj", "{DBA22765-0476-4858-B40B-00BA7591DA5B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Walter.Evaluacion.ApiConsultas", "Walter.Evaluacion.ApiConsultas\Walter.Evaluacion.ApiConsultas.csproj", "{9E8362A8-AAF2-4A96-9DC5-908EE22F6758}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +19,14 @@ Global
 		{07A2BA6D-2671-48E8-820F-F314594349A6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{07A2BA6D-2671-48E8-820F-F314594349A6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{07A2BA6D-2671-48E8-820F-F314594349A6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DBA22765-0476-4858-B40B-00BA7591DA5B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DBA22765-0476-4858-B40B-00BA7591DA5B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DBA22765-0476-4858-B40B-00BA7591DA5B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DBA22765-0476-4858-B40B-00BA7591DA5B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9E8362A8-AAF2-4A96-9DC5-908EE22F6758}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9E8362A8-AAF2-4A96-9DC5-908EE22F6758}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9E8362A8-AAF2-4A96-9DC5-908EE22F6758}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9E8362A8-AAF2-4A96-9DC5-908EE22F6758}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

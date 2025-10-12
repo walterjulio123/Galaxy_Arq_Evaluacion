@@ -16,5 +16,7 @@ namespace Walter.Evaluacion.ApiPedidos.Models
         [Required]
         public decimal MontoPedido { get; set; }
 
+        [Required]
+        public int FormaPago { get; set; }
     }
 }

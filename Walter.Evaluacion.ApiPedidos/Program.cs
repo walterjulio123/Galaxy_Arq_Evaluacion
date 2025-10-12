@@ -10,6 +10,8 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.Configure<TopicConfig>(builder.Configuration.GetSection("topic"));
 
 builder.Services.AddSingleton<ITopicProducerService, TopicProducerService>();
+builder.Services.AddHttpClient<IHttpClientService, HttpClientService>();
+builder.Services.AddScoped<IPedidoService, PedidoService>();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -37,39 +39,44 @@ using (var scope = app.Services.CreateScope())
     context.Database.EnsureCreated();
 }
 
-var summaries = new[]
-{
-    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
-};
+//var summaries = new[]
+//{
+//    "Freezing", "Bracing", "Chilly", "Cool", "Mild", "Warm", "Balmy", "Hot", "Sweltering", "Scorching"
+//};
 
-app.MapGet("/weatherforecast", () =>
-{
-    var forecast = Enumerable.Range(1, 5).Select(index =>
-        new WeatherForecast
-        (
-            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
-            Random.Shared.Next(-20, 55),
-            summaries[Random.Shared.Next(summaries.Length)]
-        ))
-        .ToArray();
-    return forecast;
-})
-.WithName("GetWeatherForecast")
-.WithOpenApi();
+//app.MapGet("/weatherforecast", () =>
+//{
+//    var forecast = Enumerable.Range(1, 5).Select(index =>
+//        new WeatherForecast
+//        (
+//            DateOnly.FromDateTime(DateTime.Now.AddDays(index)),
+//            Random.Shared.Next(-20, 55),
+//            summaries[Random.Shared.Next(summaries.Length)]
+//        ))
+//        .ToArray();
+//    return forecast;
+//})
+//.WithName("GetWeatherForecast")
+//.WithOpenApi();
 
-app.MapPost("/procesa", async (PedidoDto pedidoDto, ILogger<Program> logger, ITopicProducerService topicProducerService) => {
+app.MapPost("/procesa", async (CreatePedidoDto pedidoDto,
+    IPedidoService service,
+    ITopicProducerService topicProducerService) =>
+{
     if (pedidoDto == null)
     {
         return Results.BadRequest(new { message = "El mensaje no puede estar vacio" });
     }
+    var pedido = await service.CreatePedidoAsync(pedidoDto);
     var result = await topicProducerService.SendMessageAsync(
-        new TopicMessage
-        {
-            IdPedido = 1,
-            NombreCliente = "nombre del cliente",
-            IdPago = 2,
-            Montopago = pedidoDto.Montopago
-        });
+    new TopicMessage
+    {
+        IdPedido = pedido.IdPedido,
+        NombreCliente = "traer cliente",
+        IdPago = 1,
+        FormaPago = pedido.FormaPago,
+        MontoPago = pedido.MontoPedido
+    });
     return Results.Ok(result);
 
 }).WithOpenApi();
