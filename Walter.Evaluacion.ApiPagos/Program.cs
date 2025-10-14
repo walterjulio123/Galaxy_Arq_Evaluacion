@@ -1,7 +1,11 @@
 using Microsoft.EntityFrameworkCore;
 using Walter.Evaluacion.ApiPagos.Data;
+using Walter.Evaluacion.ApiPagos.DTOs;
+using Walter.Evaluacion.ApiPagos.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddScoped<IPagoService, PagoService>();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -48,6 +52,17 @@ app.MapGet("/weatherforecast", () =>
 .WithName("GetWeatherForecast")
 .WithOpenApi();
 
+app.MapPost("/pago", async (CreatePagoDto createPagoDto,
+    IPagoService service) =>
+{
+    if (createPagoDto == null)
+    {
+        return Results.BadRequest(new { message = "El pago no puede estar vacio" });
+    }
+    var result = await service.CreatePagoAsync(createPagoDto);
+    return Results.Ok(result);
+
+}).WithOpenApi();
 app.Run();
 
 internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)

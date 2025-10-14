@@ -24,6 +24,9 @@ namespace Walter.Evaluacion.ApiPagos.Data
                     .IsRequired();
                 entity.Property(e => e.FormaPago)
                     .IsRequired();
+                entity.Property(e => e.MontoPago)
+                    .IsRequired()
+                    .HasColumnType("decimal(9,2)");
             });
         }
     }

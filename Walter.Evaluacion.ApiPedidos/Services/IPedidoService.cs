@@ -5,5 +5,7 @@ namespace Walter.Evaluacion.ApiPedidos.Services
     public interface IPedidoService
     {
         Task<PedidoDto> CreatePedidoAsync(CreatePedidoDto createArticuloDto);
+        Task<ClienteDto> GetClienteByIdAsync(int id);
+        Task<PagoDto> CreatePagoAsync(CreatePagoDto createPagoDto);
     }
 }

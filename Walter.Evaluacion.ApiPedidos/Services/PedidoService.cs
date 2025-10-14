@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using Confluent.Kafka;
+using Microsoft.Extensions.Logging;
 using Walter.Evaluacion.ApiPedidos.Data;
 using Walter.Evaluacion.ApiPedidos.DTOs;
 using Walter.Evaluacion.ApiPedidos.Models;
@@ -9,11 +10,18 @@ namespace Walter.Evaluacion.ApiPedidos.Services
     {
         private readonly PedidosDbContext _context;
         private readonly ILogger<PedidoService> _logger;
+        private readonly IConfiguration _configuration;
+        private readonly IHttpClientService _httpClientService;
 
-        public PedidoService(PedidosDbContext context, ILogger<PedidoService> logger)
+        public PedidoService(IHttpClientService httpClientService,
+            PedidosDbContext context,
+            ILogger<PedidoService> logger,
+            IConfiguration configuration)
         {
+            _httpClientService = httpClientService;
             _context = context;
             _logger = logger;
+            _configuration = configuration;
         }
 
         public async Task<PedidoDto> CreatePedidoAsync(CreatePedidoDto createPedidoDto)
@@ -37,6 +45,27 @@ namespace Walter.Evaluacion.ApiPedidos.Services
                 FormaPago = pedido.FormaPago,
                 MontoPedido = pedido.MontoPedido
             };
+        }
+
+        public async Task<ClienteDto> GetClienteByIdAsync(int id)
+        {
+            _logger.LogInformation("Getting a cliente by id");
+            var cliente = await _context.Clientes.FindAsync(id);
+            if (cliente == null)
+                return null;
+
+            return new ClienteDto
+            {
+                IdCliente = cliente.IdCliente,
+                NombreCliente = cliente.NombreCliente
+            };
+        }
+
+        public async Task<PagoDto> CreatePagoAsync(CreatePagoDto createPagoDto)
+        {
+            var pagoBaseUrl = _configuration["Services:Pago:BaseUrl"] ?? "http://localhost:5102";
+            var url = $"{pagoBaseUrl}/pago";
+            return await _httpClientService.PostAsync<PagoDto>(url, createPagoDto);
         }
     }
 }
