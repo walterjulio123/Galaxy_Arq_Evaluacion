@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using Walter.Evaluacion.ApiPedidos.Configuration;
-using Walter.Evaluacion.ApiPedidos.Models;
+using Walter.Evaluacion.ApiPedidos.DTOs;
 
 namespace Walter.Evaluacion.ApiPedidos.Services
 {
@@ -25,7 +25,7 @@ namespace Walter.Evaluacion.ApiPedidos.Services
 
             _producer = new ProducerBuilder<string, string>(config).Build();
         }
-        public async Task<bool> SendMessageAsync(TopicMessage message, CancellationToken cancellationToken = default)
+        public async Task<bool> SendMessageAsync(TopicMessageDto message, CancellationToken cancellationToken = default)
         {
             var messageJson = JsonSerializer.Serialize(message);
 

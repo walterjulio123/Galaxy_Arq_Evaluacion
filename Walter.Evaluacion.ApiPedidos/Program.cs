@@ -67,7 +67,7 @@ app.MapPost("/procesa", async (CreatePedidoDto pedidoDto,
         });
 
     var result = await topicProducerService.SendMessageAsync(
-    new TopicMessage
+    new TopicMessageDto
     {
         IdPedido = pedido.IdPedido,
         NombreCliente = cliente.NombreCliente,

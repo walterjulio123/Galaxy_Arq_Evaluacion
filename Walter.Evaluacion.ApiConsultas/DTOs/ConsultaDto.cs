@@ -1,19 +1,27 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace Walter.Evaluacion.ApiConsultas.Models
+namespace Walter.Evaluacion.ApiConsultas.DTOs
 {
-    public class Consulta
+    public class ConsultaDto
     {
-        [BsonId]
-        [BsonRepresentation(BsonType.ObjectId)]
         public string? IdConsulta { get; set; }
+
         public int IdPedido { get; set; }
         public string NombreCliente { get; set; } = string.Empty;
         public int IdPago { get; set; }
         public int FormaPago { get; set; }
-
-        [BsonRepresentation(BsonType.Decimal128)]
         public decimal MontoPago { get; set; }
+
+    }
+
+    public class CreateConsultaDto
+    {
+        public int IdPedido { get; set; }
+        public string NombreCliente { get; set; } = string.Empty;
+        public int IdPago { get; set; }
+        public int FormaPago { get; set; }
+        public decimal MontoPago { get; set; }
+
     }
 }
