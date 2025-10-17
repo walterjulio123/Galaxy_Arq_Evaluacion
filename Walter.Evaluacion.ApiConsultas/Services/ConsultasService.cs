@@ -1,6 +1,8 @@
 ﻿using MongoDB.Driver;
+using System;
 using Walter.Evaluacion.ApiConsultas.Data;
 using Walter.Evaluacion.ApiConsultas.DTOs;
+using Walter.Evaluacion.ApiConsultas.Enums;
 using Walter.Evaluacion.ApiConsultas.Models;
 
 namespace Walter.Evaluacion.ApiConsultas.Services
@@ -14,7 +16,7 @@ namespace Walter.Evaluacion.ApiConsultas.Services
             _context = context;
             _logger = logger;
         }
-        public async Task<ConsultaDto> CreateConsultaAsync(CreateConsultaDto createConsultaDto)
+        public async Task<bool> CreateConsultaAsync(CreateConsultaDto createConsultaDto)
         {
             _logger.LogInformation("Creating new consulta with IdPedido: {IdPedido}", createConsultaDto.IdPedido);
 
@@ -25,46 +27,36 @@ namespace Walter.Evaluacion.ApiConsultas.Services
             {
                 throw new ArgumentOutOfRangeException(nameof(createConsultaDto.MontoPago), "Monto fuera del rango permitido para decimal(9,2).");
             }
-
             var consulta = new Consulta
             {
                 IdPedido = createConsultaDto.IdPedido,
                 NombreCliente = createConsultaDto.NombreCliente,
                 IdPago = createConsultaDto.IdPago,
                 FormaPago = createConsultaDto.FormaPago,
+                NombreFormaPago = createConsultaDto.NombreFormaPago,
                 MontoPago = monto
             };
 
-            // LOG: inspecciona BSON antes de insert (útil para diagnosticar)
-            //_logger.LogInformation("BSON antes de insert: {Doc}", consulta.ToBsonDocument().ToJson());
-
             await _context.Consultas.InsertOneAsync(consulta);
 
-            return new ConsultaDto
-            {
-                IdConsulta = consulta.IdConsulta,
-                IdPedido = consulta.IdPedido,
-                NombreCliente = consulta.NombreCliente,
-                IdPago = consulta.IdPago,
-                FormaPago = consulta.FormaPago,
-                MontoPago = consulta.MontoPago
-            };
+            return consulta != null;
         }
 
-        public async Task<IEnumerable<TopicMessageDto>> GetRegistrosAsync()
+        public async Task<IEnumerable<ConsultaDto>> GetRegistrosAsync()
         {
             _logger.LogInformation("Getting all comprobantes from MongoDB");
             var consultas = await _context.Consultas.Find(_ => true).ToListAsync();
             return consultas.Select(MapToDto);
         }
-        private static TopicMessageDto MapToDto(Consulta consulta)
+        private static ConsultaDto MapToDto(Consulta consulta)
         {
-            return new TopicMessageDto
+            return new ConsultaDto
             {
                 IdPedido = consulta.IdPedido,
                 NombreCliente = consulta.NombreCliente,
                 IdPago = consulta.IdPago,
                 FormaPago = consulta.FormaPago,
+                NombreFormaPago = consulta.NombreFormaPago,
                 MontoPago = consulta.MontoPago
             };
         }

@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using System.Text.Json;
 using Walter.Evaluacion.ApiConsultas.Configuration;
 using Walter.Evaluacion.ApiConsultas.DTOs;
+using Walter.Evaluacion.ApiConsultas.Enums;
 
 namespace Walter.Evaluacion.ApiConsultas.Services
 {
@@ -65,14 +66,15 @@ namespace Walter.Evaluacion.ApiConsultas.Services
                                     NombreCliente = message.NombreCliente,
                                     IdPago = message.IdPago,
                                     FormaPago = message.FormaPago,
+                                    NombreFormaPago = message.FormaPago.GetNombreFormaPago(),
                                     MontoPago = message.MontoPago
                                 };
 
                                 // 4. Enviar a Sol.EC.Consultas (MongoDB)
                                 var success = await consultaService.CreateConsultaAsync(consultaMongo);
-                                if (success!=null)
+                                if (success)
                                 {
-                                    logger.LogInformation("Successfully consulta saved with ID: {IdPedido}", success.IdConsulta);
+                                    logger.LogInformation("Successfully consulta saved");
                                 }
                                 else
                                 {

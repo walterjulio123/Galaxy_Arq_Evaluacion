@@ -11,6 +11,7 @@ namespace Walter.Evaluacion.ApiConsultas.DTOs
         public string NombreCliente { get; set; } = string.Empty;
         public int IdPago { get; set; }
         public int FormaPago { get; set; }
+        public string NombreFormaPago { get; set; } = string.Empty;
         public decimal MontoPago { get; set; }
 
     }
@@ -21,6 +22,7 @@ namespace Walter.Evaluacion.ApiConsultas.DTOs
         public string NombreCliente { get; set; } = string.Empty;
         public int IdPago { get; set; }
         public int FormaPago { get; set; }
+        public string NombreFormaPago { get; set; } = string.Empty;
         public decimal MontoPago { get; set; }
 
     }

@@ -6,6 +6,7 @@ namespace Walter.Evaluacion.ApiPedidos.Services
     {
         Task<PedidoDto> CreatePedidoAsync(CreatePedidoDto createArticuloDto);
         Task<ClienteDto> GetClienteByIdAsync(int id);
+        Task<IEnumerable<ClienteDto>> GetClientesAsync();
         Task<PagoDto> CreatePagoAsync(CreatePagoDto createPagoDto);
     }
 }

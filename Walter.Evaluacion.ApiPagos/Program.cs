@@ -59,6 +59,17 @@ app.MapPost("/pago", async (CreatePagoDto createPagoDto,
     {
         return Results.BadRequest(new { message = "El pago no puede estar vacio" });
     }
+    // valida precision (decimal(9,2) => max 9999999.99)
+    if (Math.Abs(createPagoDto.MontoPago) > 9999999.99m || createPagoDto.MontoPago <= 0m)
+    {
+        throw new ArgumentOutOfRangeException(nameof(createPagoDto.MontoPago), "Monto fuera del rango permitido (0.01 - 9999999.99)");
+    }
+
+    // valida que FormaPago solo pueda ser 1, 2 o 3
+    if (createPagoDto.FormaPago < 1 || createPagoDto.FormaPago > 3)
+    {
+        return Results.BadRequest(new { message = "FormaPago inválida. Valores permitidos: 1, 2, 3." });
+    }
     var result = await service.CreatePagoAsync(createPagoDto);
     return Results.Ok(result);
 

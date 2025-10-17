@@ -1,4 +1,5 @@
 ﻿using Confluent.Kafka;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Walter.Evaluacion.ApiPedidos.Data;
 using Walter.Evaluacion.ApiPedidos.DTOs;
@@ -59,6 +60,17 @@ namespace Walter.Evaluacion.ApiPedidos.Services
                 IdCliente = cliente.IdCliente,
                 NombreCliente = cliente.NombreCliente
             };
+        }
+
+        public async Task<IEnumerable<ClienteDto>> GetClientesAsync()
+        {
+            _logger.LogInformation("Getting all clients");
+            var clientes = await _context.Clientes.ToListAsync();
+            return clientes.Select(c => new ClienteDto
+            {
+                IdCliente = c.IdCliente,
+                NombreCliente = c.NombreCliente
+            });
         }
 
         public async Task<PagoDto> CreatePagoAsync(CreatePagoDto createPagoDto)

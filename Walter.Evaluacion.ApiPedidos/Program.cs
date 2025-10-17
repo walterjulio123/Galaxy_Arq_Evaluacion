@@ -39,22 +39,36 @@ using (var scope = app.Services.CreateScope())
     context.Database.EnsureCreated();
 }
 
-app.MapPost("/procesa", async (CreatePedidoDto pedidoDto,
+app.MapPost("/procesa", async (CreatePedidoDto createPedidoDto,
     IPedidoService service,
     ITopicProducerService topicProducerService) =>
 {
-    if (pedidoDto == null)
+    if (createPedidoDto == null)
     {
         return Results.BadRequest(new { message = "El mensaje no puede estar vacio" });
     }
+
+    // valida precision (decimal(9,2) => max 9999999.99)
+    if (Math.Abs(createPedidoDto.MontoPedido) > 9999999.99m || createPedidoDto.MontoPedido <= 0m)
+    {
+        throw new ArgumentOutOfRangeException(nameof(createPedidoDto.MontoPedido), "Monto fuera del rango permitido (0.01 - 9999999.99)");
+    }
+
+    // valida que FormaPago solo pueda ser 1, 2 o 3
+    if (createPedidoDto.FormaPago < 1 || createPedidoDto.FormaPago > 3)
+    {
+        return Results.BadRequest(new { message = "FormaPago inválida. Valores permitidos: 1, 2, 3." });
+    }
+
     //Valida que el cliente exista
-    var cliente = await service.GetClienteByIdAsync(pedidoDto.IdCliente);
+    var cliente = await service.GetClienteByIdAsync(createPedidoDto.IdCliente);
     if (cliente == null)
     {
-        return Results.BadRequest(new { message = $"El cliente con id {pedidoDto.IdCliente} no está registrado" });
+        return Results.BadRequest(new { message = $"El cliente con id {createPedidoDto.IdCliente} no está registrado" });
     }
+
     //Crea un registro en pedido
-    var pedido = await service.CreatePedidoAsync(pedidoDto);
+    var pedido = await service.CreatePedidoAsync(createPedidoDto);
 
     //Crea un registro en pago
     var pago = await service.CreatePagoAsync(
@@ -66,6 +80,7 @@ app.MapPost("/procesa", async (CreatePedidoDto pedidoDto,
             MontoPago = pedido.MontoPedido
         });
 
+    //Genera mensaje para el topic
     var result = await topicProducerService.SendMessageAsync(
     new TopicMessageDto
     {
@@ -77,6 +92,23 @@ app.MapPost("/procesa", async (CreatePedidoDto pedidoDto,
     });
     return Results.Ok(result);
 
-}).WithOpenApi();
+})
+.WithName("ProcesaPedido")
+.WithOpenApi();
+
+app.MapGet("/clientes", async (IPedidoService service) =>
+{
+    return await service.GetClientesAsync();
+})
+.WithName("GetClientes")
+.WithOpenApi();
+
+app.MapGet("/clientes/{id}", async (int id, IPedidoService service) =>
+{
+    var cliente = await service.GetClienteByIdAsync(id);
+    return cliente is not null ? Results.Ok(cliente) : Results.NotFound();
+})
+.WithName("GetCliente")
+.WithOpenApi();
 
 app.Run();
