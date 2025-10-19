@@ -13,16 +13,19 @@ namespace Walter.Evaluacion.ApiPedidos.Services
         private readonly ILogger<PedidoService> _logger;
         private readonly IConfiguration _configuration;
         private readonly IHttpClientService _httpClientService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public PedidoService(IHttpClientService httpClientService,
             PedidosDbContext context,
             ILogger<PedidoService> logger,
-            IConfiguration configuration)
+            IConfiguration configuration,
+            IHttpContextAccessor httpContextAccessor)
         {
             _httpClientService = httpClientService;
             _context = context;
             _logger = logger;
             _configuration = configuration;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<PedidoDto> CreatePedidoAsync(CreatePedidoDto createPedidoDto)
@@ -73,11 +76,29 @@ namespace Walter.Evaluacion.ApiPedidos.Services
             });
         }
 
-        public async Task<PagoDto> CreatePagoAsync(CreatePagoDto createPagoDto)
+        public async Task<int> CreatePagoAsync(CreatePagoDto createPagoDto)
         {
             var pagoBaseUrl = _configuration["Services:Pago:BaseUrl"] ?? "http://localhost:5102";
-            var url = $"{pagoBaseUrl}/pago";
-            return await _httpClientService.PostAsync<PagoDto>(url, createPagoDto);
+            var url = $"{pagoBaseUrl}/api/pago";
+            // Obtener header Authorization del HttpContext (puede ser "Bearer {token}")
+            var authHeader = _httpContextAccessor.HttpContext?.Request?.Headers["Authorization"].ToString();
+            string bearerToken = null;
+            if (!string.IsNullOrWhiteSpace(authHeader))
+            {
+                const string bearerPrefix = "Bearer ";
+                if (authHeader.StartsWith(bearerPrefix, StringComparison.OrdinalIgnoreCase))
+                    bearerToken = authHeader.Substring(bearerPrefix.Length).Trim();
+                else
+                    bearerToken = authHeader.Trim();
+            }
+
+            // Fallback: token del cliente desde configuración si no hay header
+            var tokenToUse = !string.IsNullOrWhiteSpace(bearerToken)
+                ? bearerToken
+                : _configuration["Services:Pago:ClientToken"];
+
+            return await _httpClientService.PostAsync<int>(url, createPagoDto, tokenToUse);
+            //return await _httpClientService.PostAsync<int>(url, createPagoDto,);
         }
     }
 }

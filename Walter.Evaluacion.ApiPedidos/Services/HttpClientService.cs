@@ -1,4 +1,5 @@
 ﻿
+using System.Net.Http.Headers;
 using System.Text.Json;
 
 namespace Walter.Evaluacion.ApiPedidos.Services
@@ -11,7 +12,7 @@ namespace Walter.Evaluacion.ApiPedidos.Services
             _httpClient = httpClient;
             //_logger = logger;
         }
-        public async Task<T?> PostAsync<T>(string url, object data)
+        public async Task<T?> PostAsync<T>(string url, object data, string token)
         {
             try
             {
@@ -19,7 +20,14 @@ namespace Walter.Evaluacion.ApiPedidos.Services
                 var jsonContent = JsonSerializer.Serialize(data);
                 var content = new StringContent(jsonContent, System.Text.Encoding.UTF8, "application/json");
 
-                var response = await _httpClient.PostAsync(url, content);
+                using var request = new HttpRequestMessage(HttpMethod.Post, url) { Content = content };
+                if (!string.IsNullOrWhiteSpace(token))
+                {
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                }
+                var response = await _httpClient.SendAsync(request);
+
+                //var response = await _httpClient.PostAsync(url, content);
 
                 if (response.IsSuccessStatusCode)
                 {

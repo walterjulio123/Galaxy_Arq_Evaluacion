@@ -14,7 +14,7 @@ namespace Walter.Evaluacion.ApiPagos.Services
             _context = context;
             _logger = logger;
         }
-        public async Task<PagoDto> CreatePagoAsync(CreatePagoDto createPagoDto)
+        public async Task<int> CreatePagoAsync(CreatePagoDto createPagoDto)
         {
             _logger.LogInformation("Creating new pago: {IdPedido}", createPagoDto.IdPedido);
             var pago = new Pago
@@ -29,14 +29,7 @@ namespace Walter.Evaluacion.ApiPagos.Services
             _context.Pagos.Add(pago);
             await _context.SaveChangesAsync();
 
-            return new PagoDto
-            {
-                IdPago = pago.IdPago,
-                IdCliente = pago.IdCliente,
-                FormaPago = pago.FormaPago,
-                MontoPago = pago.MontoPago,
-                IdPedido = pago.IdPedido
-            };
+            return pago.IdPago;
         }
     }
 }

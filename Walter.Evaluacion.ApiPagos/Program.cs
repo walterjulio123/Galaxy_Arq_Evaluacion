@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Walter.Evaluacion.ApiPagos.Data;
 using Walter.Evaluacion.ApiPagos.DTOs;
 using Walter.Evaluacion.ApiPagos.Services;
@@ -6,6 +8,24 @@ using Walter.Evaluacion.ApiPagos.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddScoped<IPagoService, PagoService>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(o =>
+    {
+
+        o.Authority = "http://localhost:8080/realms/realm-pepito";
+        o.RequireHttpsMetadata = false;
+        o.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidIssuer = "http://localhost:8080/realms/realm-pepito",
+            ValidateIssuer = true,
+            ValidAudience = "api-pagos",
+            ValidateAudience = true,
+            ValidateLifetime = true
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -17,6 +37,9 @@ builder.Services.AddDbContext<PagosDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -49,10 +72,11 @@ app.MapGet("/weatherforecast", () =>
         .ToArray();
     return forecast;
 })
+.RequireAuthorization()
 .WithName("GetWeatherForecast")
 .WithOpenApi();
 
-app.MapPost("/pago", async (CreatePagoDto createPagoDto,
+app.MapPost("/api/pago", async (CreatePagoDto createPagoDto,
     IPagoService service) =>
 {
     if (createPagoDto == null)
@@ -73,7 +97,9 @@ app.MapPost("/pago", async (CreatePagoDto createPagoDto,
     var result = await service.CreatePagoAsync(createPagoDto);
     return Results.Ok(result);
 
-}).WithOpenApi();
+})
+.RequireAuthorization()
+.WithOpenApi();
 app.Run();
 
 internal record WeatherForecast(DateOnly Date, int TemperatureC, string? Summary)

@@ -1,10 +1,6 @@
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
-using MongoDB.Bson.Serialization.Serializers;
 using MongoDB.Driver;
 using Walter.Evaluacion.ApiConsultas.Configuration;
 using Walter.Evaluacion.ApiConsultas.Data;
-using Walter.Evaluacion.ApiConsultas.Models;
 using Walter.Evaluacion.ApiConsultas.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -48,7 +44,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
-app.MapGet("/consulta", async (IConsultasService service) =>
+app.MapGet("/api/consulta", async (IConsultasService service) =>
 {
     return await service.GetRegistrosAsync();
 })

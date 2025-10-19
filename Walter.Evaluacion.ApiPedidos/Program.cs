@@ -1,4 +1,6 @@
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Walter.Evaluacion.ApiPedidos.Configuration;
 using Walter.Evaluacion.ApiPedidos.Data;
 using Walter.Evaluacion.ApiPedidos.DTOs;
@@ -8,10 +10,27 @@ using Walter.Evaluacion.ApiPedidos.Services;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.Configure<TopicConfig>(builder.Configuration.GetSection("Topic"));
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton<ITopicProducerService, TopicProducerService>();
 builder.Services.AddHttpClient<IHttpClientService, HttpClientService>();
 builder.Services.AddScoped<IPedidoService, PedidoService>();
+
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(o =>
+    {
+        o.Authority = "http://localhost:8080/realms/realm-pepito";
+        o.RequireHttpsMetadata = false;
+        o.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidIssuer = "http://localhost:8080/realms/realm-pepito",
+            ValidateIssuer = true,
+            ValidAudience = "api-pedidos",
+            ValidateAudience = true,
+            ValidateLifetime = true
+        };
+    });
+
+builder.Services.AddAuthorization();
 
 // Add services to the container.
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -24,6 +43,9 @@ builder.Services.AddDbContext<PedidosDbContext>(options =>
         new MySqlServerVersion(new Version(8, 0, 21))));
 
 var app = builder.Build();
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -39,7 +61,7 @@ using (var scope = app.Services.CreateScope())
     context.Database.EnsureCreated();
 }
 
-app.MapPost("/procesa", async (CreatePedidoDto createPedidoDto,
+app.MapPost("/api/procesa", async (CreatePedidoDto createPedidoDto,
     IPedidoService service,
     ITopicProducerService topicProducerService) =>
 {
@@ -71,7 +93,7 @@ app.MapPost("/procesa", async (CreatePedidoDto createPedidoDto,
     var pedido = await service.CreatePedidoAsync(createPedidoDto);
 
     //Crea un registro en pago
-    var pago = await service.CreatePagoAsync(
+    var idPago = await service.CreatePagoAsync(
         new CreatePagoDto
         {
             IdPedido = pedido.IdPedido,
@@ -86,29 +108,37 @@ app.MapPost("/procesa", async (CreatePedidoDto createPedidoDto,
     {
         IdPedido = pedido.IdPedido,
         NombreCliente = cliente.NombreCliente,
-        IdPago = pago.IdPago,
+        IdPago = idPago,
         FormaPago = pedido.FormaPago,
         MontoPago = pedido.MontoPedido
     });
-    return Results.Ok(result);
+    return Results.Ok(new TopicMessageDto
+    {
+        IdPedido = pedido.IdPedido,
+        NombreCliente = cliente.NombreCliente,
+        IdPago = idPago,
+        FormaPago = pedido.FormaPago,
+        MontoPago = pedido.MontoPedido
+    });
 
 })
+.RequireAuthorization()
 .WithName("ProcesaPedido")
 .WithOpenApi();
 
-app.MapGet("/clientes", async (IPedidoService service) =>
-{
-    return await service.GetClientesAsync();
-})
-.WithName("GetClientes")
-.WithOpenApi();
+//app.MapGet("/api/clientes", async (IPedidoService service) =>
+//{
+//    return await service.GetClientesAsync();
+//})
+//.WithName("GetClientes")
+//.WithOpenApi();
 
-app.MapGet("/clientes/{id}", async (int id, IPedidoService service) =>
-{
-    var cliente = await service.GetClienteByIdAsync(id);
-    return cliente is not null ? Results.Ok(cliente) : Results.NotFound();
-})
-.WithName("GetCliente")
-.WithOpenApi();
+//app.MapGet("/api/clientes/{id}", async (int id, IPedidoService service) =>
+//{
+//    var cliente = await service.GetClienteByIdAsync(id);
+//    return cliente is not null ? Results.Ok(cliente) : Results.NotFound();
+//})
+//.WithName("GetCliente")
+//.WithOpenApi();
 
 app.Run();

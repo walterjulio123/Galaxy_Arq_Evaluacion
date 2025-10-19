@@ -4,6 +4,6 @@ namespace Walter.Evaluacion.ApiPagos.Services
 {
     public interface IPagoService
     {
-        Task<PagoDto> CreatePagoAsync(CreatePagoDto createPagoDto);
+        Task<int> CreatePagoAsync(CreatePagoDto createPagoDto);
     }
 }

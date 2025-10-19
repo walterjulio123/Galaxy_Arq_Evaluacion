@@ -44,7 +44,7 @@ namespace Walter.Evaluacion.ApiConsultas.Services
 
         public async Task<IEnumerable<ConsultaDto>> GetRegistrosAsync()
         {
-            _logger.LogInformation("Getting all comprobantes from MongoDB");
+            _logger.LogInformation("Getting all registros from MongoDB");
             var consultas = await _context.Consultas.Find(_ => true).ToListAsync();
             return consultas.Select(MapToDto);
         }
@@ -52,6 +52,7 @@ namespace Walter.Evaluacion.ApiConsultas.Services
         {
             return new ConsultaDto
             {
+                IdConsulta =consulta.IdConsulta,
                 IdPedido = consulta.IdPedido,
                 NombreCliente = consulta.NombreCliente,
                 IdPago = consulta.IdPago,
