@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Walter.Evaluacion.ApiPedidos.Configuration;
 using Walter.Evaluacion.ApiPedidos.Data;
 using Walter.Evaluacion.ApiPedidos.DTOs;
@@ -8,6 +10,20 @@ using Walter.Evaluacion.ApiPedidos.Models;
 using Walter.Evaluacion.ApiPedidos.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+///configurando el tracing distribuido
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(r => r.AddService("api-pedidos"))
+    .WithTracing(t => {
+        t.AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddOtlpExporter(opt =>
+        {
+            opt.Endpoint = new Uri("http://localhost:4317");
+            opt.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+        });
+
+    });
 
 builder.Services.Configure<TopicConfig>(builder.Configuration.GetSection("Topic"));
 builder.Services.AddHttpContextAccessor();

@@ -1,11 +1,27 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Walter.Evaluacion.ApiPagos.Data;
 using Walter.Evaluacion.ApiPagos.DTOs;
 using Walter.Evaluacion.ApiPagos.Services;
 
 var builder = WebApplication.CreateBuilder(args);
+
+///configurando el tracing distribuido
+builder.Services.AddOpenTelemetry()
+    .ConfigureResource(r => r.AddService("api-pagos"))
+    .WithTracing(t => {
+        t.AddAspNetCoreInstrumentation()
+        .AddHttpClientInstrumentation()
+        .AddOtlpExporter(opt =>
+        {
+            opt.Endpoint = new Uri("http://localhost:4317");
+            opt.Protocol = OpenTelemetry.Exporter.OtlpExportProtocol.Grpc;
+        });
+
+    });
 
 builder.Services.AddScoped<IPagoService, PagoService>();
 
